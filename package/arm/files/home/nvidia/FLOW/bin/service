@@ -1,0 +1,57 @@
+#!/bin/bash
+stop() {
+
+    pid=$(ps -ef | grep FLOW/client | grep -v grep | awk '{print $2}')
+    echo $pid
+
+    for id in $pid; do
+        echo "whale123" | sudo -S kill -9 $id
+        cmd=""
+    done
+}
+
+restart() {
+    stop
+    start
+}
+
+start() {
+    /home/nvidia/FLOW/client
+}
+
+check() {
+    clientPid=$(ps -ef | grep FLOW/client | grep -v grep | awk '{print $2}')
+    if [ -z "$clientPid" ]; then
+        exec /home/nvidia/FLOW/bin/service restart &
+        if [ $? -eq 0 ]; then
+            echo " service check -> restart ok.." >>/home/nvidia/FLOW/logfile
+        fi
+    fi
+
+}
+
+if [ $# -ne 1 ]; then
+    exit -1
+fi
+
+export LD_LIBRARY_PATH=/home/nvidia/FLOW/lib/:$LD_LIBRARY_PATH
+
+case $1 in
+stop)
+    echo "stop"
+    stop
+    ;;
+start)
+    echo "start"
+    start
+
+    ;;
+restart)
+    echo "restart "
+    restart
+    ;;
+check)
+    echo "check"
+    check
+    ;;
+esac

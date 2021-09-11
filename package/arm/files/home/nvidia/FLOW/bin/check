@@ -1,0 +1,109 @@
+#!/bin/bash
+
+function cleanlog() {
+    flowLogDir="/home/nvidia/FLOW/logs/"
+    percent=$(df -H | head -2 | tail | awk '{print $5}' | grep -oP '\d+')
+    # all disk size is 13GB, 
+    if [ ${percent} -gt 90 ]; then
+        echo $(date "+%F %T") "begin to clean some data/log/mp4/jpg" >>$logfile
+        rm /root/FLOW-rk3399-release*
+        rm /root/rgb_video/*
+        find /home/nvidia/FLOW/data/ -type f -mtime +5 -exec rm -rf {} \;
+        filename=$(date "+%F-%H-%M-%S")-algo-log.tar.gz
+        tar -czPf $filename /home/nvidia/FLOW/logs/algo*
+        mv $filename ${flowLogDir}
+        rm -rf /tmp/client.*
+        rm -rf /home/nvidia/FLOW/bin/rgb_video/
+        rm -rf /home/nvidia/FLOW/bin/RGBVideoRecord/
+        find /home/nvidia/FLOW/bin/ -name 'FLOW-rk3399*' -mtime +40 -exec rm -rf {} \;
+    fi
+}
+
+function checkProcess() {
+    pid=$(ps -ef | grep FLOW/bin/$1 | grep -v grep | awk '{print $2}')
+    if [ -z "$pid" ]; then
+        export LD_LIBRARY_PATH=/home/nvidia/FLOW/lib/:$LD_LIBRARY_PATH
+        date >/home/nvidia/FLOW/$1.log
+        sh -c /home/nvidia/FLOW/bin/$1 >>/home/nvidia/FLOW/$1_print.log 2>&1 &
+        if [ $? -eq 0 ]; then
+            date >/home/nvidia/FLOW/$1.log
+            echo " $1 check -> restart ok.." >>/home/nvidia/FLOW/$1.log
+        fi
+    fi
+}
+
+function calculateCompanyFormatSn() {
+    SN=$1
+    total=0
+    for ((i = 0; i < ${#SN}; i++)); do
+        var=$(printf "%d" "'${SN:i:1}")
+        total=$(($total + $var))
+    done
+
+    hex=$(printf "%x" $total | tr 'a-z' 'A-Z')
+    lastByte=${hex: -2}
+    md5Code=$(echo -n "$SN$lastByte" | md5sum | tr 'a-z' 'A-Z' | cut -d" " -f1)
+    systemSN=${SN}${md5Code: -4}
+    echo $systemSN
+}
+
+function calSn() {
+    case $1 in
+    "3399")
+        txMac=$(/sbin/ifconfig eth0 | grep "HWaddr" | awk '{print $5}')
+        txMac=$(echo $txMac | sed 's/[:]//g' | tr 'a-z' 'A-Z')
+        txInfo="WRK$txMac"
+        rk3399UniqueSn=$(calculateCompanyFormatSn $txInfo)
+        ;;
+
+    "tx1")
+        txMac=$(/sbin/ifconfig eth0 | grep "HWaddr" | awk '{print $5}')
+        txMac=$(echo $txMac | sed 's/[:]//g' | tr 'a-z' 'A-Z')
+        txInfo="WTC$txMac"
+        txUniqueSn=$(calculateCompanyFormatSn $txInfo)
+        ;;
+    *)
+        mac=$(echo $2 | sed 's/[:]//g' | tr 'a-z' 'A-Z')
+        cameraInfo="WSI$mac"
+        cameraSn=$(calculateCompanyFormatSn $cameraInfo)
+        echo "cameraUnique sn: " $cameraSn
+        ;;
+    esac
+}
+
+set +x
+sysSnfile="/home/nvidia/FLOW/sys_sn"
+logfile="/home/nvidia/FLOW/logfile"
+cameraSnfile="/home/nvidia/FLOW/camera_sn"
+rk3399UniqueSn=""
+
+if [ ! -f $logfile ]; then
+    touch $logfile
+    chown whale:whale $logfile
+fi
+
+#ntp time recorrected
+#echo "nvidia" | sudo -S ntpdate 2.asia.pool.ntp.org >> $logfile
+
+rk3399UniqueSn=$(get_sn)
+echo "get sn: " $rk3399UniqueSn ${#rk3399UniqueSn}
+firststr=${rk3399UniqueSn:0:1}
+if [ ${#rk3399UniqueSn} -ne 19 -o "$firststr" != "W" ]; then
+    echo "get sn format error" >>$logfile
+else
+    echo "client_sn:$rk3399UniqueSn" >$sysSnfile
+    interalstr=2${rk3399UniqueSn:4:11}
+    cameraSn=$(calculateCompanyFormatSn WSI$interalstr)
+
+    if [ -e /dev/video* ] && [ ! -s $cameraSnfile ]; then
+        echo "camera_sn:$cameraSn" >$cameraSnfile
+        echo $(date "+%F %T") "USBCameraSn:" $cameraSn >>$logfile
+    fi
+
+fi
+
+echo "performance" >/sys/devices/system/cpu/cpufreq/policy4/scaling_governor
+cleanlog
+
+# check file transfer service
+checkProcess FileTrans

@@ -1,0 +1,5 @@
+.idea/*
+.idea/vcs.xml
+.ieda/workspace.xml
+build/*
+cmake-build-debug/*

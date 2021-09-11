@@ -1,0 +1,42 @@
+{
+    // "flow_grpc_server": "data.meetwhale.com:20030",
+    "whale_face_api": "47.103.31.235:5000",
+    //   "heatmap_grpc_server": "10.1.1.14:30099",
+    "feature": [
+        "peoplecounting"
+    ],
+    "-feature": [
+        // "heatmap",
+        "peoplecounting"
+    ],
+    "video_input": [
+        // "/dev/video0"
+        "hisi"
+    ],
+    "-isapi_input": [
+        "rtsp://admin:pass1234@192.168.192.12:554"
+    ],
+    //   "-heatmap": [
+    //     "rtsp://admin:aa123456@192.168.200.228:554/h264/ch39/sub/av_stream",
+    //     "rtsp://admin:aa123456@192.168.200.228:554/h264/ch33/sub/av_stream"
+    //   ],
+    "recognition_thresh": 0.5,
+    "whale_door": 0,
+    "env": "dev",
+    "time_profile": 0,
+    "snapshot_interval": 1000,
+    "face_joint_area_thresh": 3430,
+    "front_face_area_thresh": 4900,
+    "face_approach_area_thresh": 3430,
+    "body_approach_area_thresh": 35000,
+    "face_quality_thresh": 0.3,
+    "face_quality_thresh_high": 0.5,
+    "pad_send_interval": 2000,
+    "pad_preemptive_capture": 0,
+    "sys_path": "/home/nvidia/FLOW/",
+    "video_width": 960,
+    "video_height": 540,
+    "queue_size": 20,
+    "oss_endpoint": "oss-cn-beijing.aliyuncs.com",
+    "oss_bucket": "whale-cv-test"
+}

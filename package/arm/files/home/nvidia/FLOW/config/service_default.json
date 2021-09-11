@@ -1,0 +1,93 @@
+{
+  "whale_face_api": "47.103.31.235:5000",
+  "feature": [
+    "peoplecounting"
+  ],
+  "video_input": [
+    "/dev/video0"
+  ],
+  "recognition_thresh": 0.5,
+  "whale_door": 0,
+  "env": "product",
+  "time_profile": 0,
+  "snapshot_interval": 1000,
+  "face_joint_area_thresh": 1000,
+  "front_face_area_thresh": 1000,
+  "face_approach_area_thresh": 1000,
+  "body_approach_area_thresh": 35000,
+  "face_quality_thresh": 0.65,
+  "face_quality_thresh_high": 0.65,
+  "capture_thresh": 0.3,
+  "pad_send_interval": 2000,
+  "pad_preemptive_capture": 0,
+  "sys_path": "/home/nvidia/FLOW/",
+  "video_width": 960,
+  "video_height": 540,
+  "queue_size": 20,
+  "work_area": [
+    680,
+    188,
+    701,
+    948,
+    971,
+    925,
+    855,
+    186
+  ],
+  "sell_area": [
+    1015,
+    110,
+    1152,
+    884,
+    1381,
+    628,
+    1239,
+    105
+  ],
+  "patrol_area": [
+    1025,
+    57,
+    1276,
+    1067,
+    1619,
+    1074,
+    1206,
+    44
+  ],
+  "enter_sell_area_thresh": 0.6,
+  "collector_grpc_server": "pedesana.cv.meetwhale.com:30091",
+  "backend_grpc_server": "whale-shop.meetwhale.com:31609",
+  "vehicle_api": "car-api.meetwhale.com:30017/vehicle",
+  "monitor_api": "https://pedesana.cv.meetwhale.com:30159/collector/pushdata/pedestrian",
+  "park_iou_thresh": 0.4,
+  "park_area": [
+    0,
+    363,
+    807,
+    622,
+    445,
+    962,
+    453,
+    910,
+    861,
+    1,
+    1080,
+    863,
+    1610,
+    861,
+    1392,
+    463,
+    1040,
+    455
+  ],
+  "worker_visual_img_interval": 10,
+  "image_monitor_interval": 10,
+  "modules": {
+    "Detect": {
+      "det_model_version": "PED_V3",
+      "det_score_thresh": 0.6,
+      "det_iou_thresh": 0.45
+    }
+  },
+  "monitor_interval": 15
+}
